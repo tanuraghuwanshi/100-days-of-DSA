@@ -1,0 +1,123 @@
+//  Merge Two Sorted Linked Lists - Implement using linked list with dynamic memory allocation.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int data;
+    struct node *next;
+};
+
+int main() {
+    struct node *head1 = NULL, *head2 = NULL, *temp = NULL, *newnode;
+    struct node *p1, *p2, *head3 = NULL, *last = NULL;
+    int n1, n2, i;
+
+    // First sorted list
+    printf("Enter number of nodes in first list: ");
+    scanf("%d", &n1);
+
+    for(i = 0; i < n1; i++) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        printf("Enter data: ");
+        scanf("%d", &newnode->data);
+        newnode->next = NULL;
+
+        if(head1 == NULL) {
+            head1 = newnode;
+            temp = newnode;
+        } else {
+            temp->next = newnode;
+            temp = newnode;
+        }
+    }
+
+    // Second sorted list
+    printf("Enter number of nodes in second list: ");
+    scanf("%d", &n2);
+
+    temp = NULL;
+    for(i = 0; i < n2; i++) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        printf("Enter data: ");
+        scanf("%d", &newnode->data);
+        newnode->next = NULL;
+
+        if(head2 == NULL) {
+            head2 = newnode;
+            temp = newnode;
+        } else {
+            temp->next = newnode;
+            temp = newnode;
+        }
+    }
+
+    // Merge process
+    p1 = head1;
+    p2 = head2;
+
+    while(p1 != NULL && p2 != NULL) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+
+        if(p1->data < p2->data) {
+            newnode->data = p1->data;
+            p1 = p1->next;
+        } else {
+            newnode->data = p2->data;
+            p2 = p2->next;
+        }
+
+        newnode->next = NULL;
+
+        if(head3 == NULL) {
+            head3 = newnode;
+            last = newnode;
+        } else {
+            last->next = newnode;
+            last = newnode;
+        }
+    }
+
+    while(p1 != NULL) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        newnode->data = p1->data;
+        newnode->next = NULL;
+
+        if(head3 == NULL) {
+            head3 = newnode;
+            last = newnode;
+        } else {
+            last->next = newnode;
+            last = newnode;
+        }
+
+        p1 = p1->next;
+    }
+
+    while(p2 != NULL) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        newnode->data = p2->data;
+        newnode->next = NULL;
+
+        if(head3 == NULL) {
+            head3 = newnode;
+            last = newnode;
+        } else {
+            last->next = newnode;
+            last = newnode;
+        }
+
+        p2 = p2->next;
+    }
+
+    // Display merged list
+    printf("Merged Sorted List:\n");
+    temp = head3;
+    while(temp != NULL) {
+        printf("%d -> ", temp->data);
+        temp = temp->next;
+    }
+    printf("NULL");
+
+    return 0;
+}
