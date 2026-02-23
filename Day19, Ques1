@@ -1,0 +1,52 @@
+// Given an array of integers, find two elements whose sum is closest to zero.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// function for sorting
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int main() {
+    int arr[100], n, i, left, right;
+    int min_sum, sum;
+    int num1, num2;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    printf("Enter elements:\n");
+    for(i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    // sort the array
+    qsort(arr, n, sizeof(int), compare);
+
+    left = 0;
+    right = n - 1;
+    min_sum = arr[left] + arr[right];
+    num1 = arr[left];
+    num2 = arr[right];
+
+    while(left < right) {
+        sum = arr[left] + arr[right];
+
+        if(abs(sum) < abs(min_sum)) {
+            min_sum = sum;
+            num1 = arr[left];
+            num2 = arr[right];
+        }
+
+        if(sum < 0)
+            left++;
+        else
+            right--;
+    }
+
+    printf("Two elements whose sum is closest to zero: %d and %d\n", num1, num2);
+    printf("Sum = %d\n", min_sum);
+
+    return 0;
+}
