@@ -1,0 +1,118 @@
+// Implement using linked list with dynamic memory allocation.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+/* Create new node */
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
+}
+
+/* Insert node at end */
+struct Node* insertEnd(struct Node* head, int data) {
+    struct Node* newNode = createNode(data);
+
+    if(head == NULL)
+        return newNode;
+
+    struct Node* temp = head;
+    while(temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = newNode;
+    return head;
+}
+
+/* Reverse linked list */
+struct Node* reverse(struct Node* head) {
+    struct Node *prev = NULL, *curr = head, *next;
+
+    while(curr != NULL) {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    return prev;
+}
+
+/* Add two linked lists */
+struct Node* addLists(struct Node* l1, struct Node* l2) {
+
+    l1 = reverse(l1);
+    l2 = reverse(l2);
+
+    int carry = 0;
+    struct Node* result = NULL;
+
+    while(l1 != NULL || l2 != NULL || carry) {
+
+        int sum = carry;
+
+        if(l1 != NULL) {
+            sum += l1->data;
+            l1 = l1->next;
+        }
+
+        if(l2 != NULL) {
+            sum += l2->data;
+            l2 = l2->next;
+        }
+
+        struct Node* newNode = createNode(sum % 10);
+        newNode->next = result;
+        result = newNode;
+
+        carry = sum / 10;
+    }
+
+    return result;
+}
+
+/* Display list */
+void display(struct Node* head) {
+    while(head != NULL) {
+        printf("%d -> ", head->data);
+        head = head->next;
+    }
+    printf("NULL\n");
+}
+
+int main() {
+
+    struct Node* l1 = NULL;
+    struct Node* l2 = NULL;
+
+    /* First number: 7243 */
+    l1 = insertEnd(l1,7);
+    l1 = insertEnd(l1,2);
+    l1 = insertEnd(l1,4);
+    l1 = insertEnd(l1,3);
+
+    /* Second number: 564 */
+    l2 = insertEnd(l2,5);
+    l2 = insertEnd(l2,6);
+    l2 = insertEnd(l2,4);
+
+    printf("First List: ");
+    display(l1);
+
+    printf("Second List: ");
+    display(l2);
+
+    struct Node* result = addLists(l1,l2);
+
+    printf("Sum List: ");
+    display(result);
+
+    return 0;
+}
