@@ -1,0 +1,68 @@
+// Implement using linked list with dynamic memory allocation.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+struct Node {
+    char data;
+    struct Node* next;
+};
+
+/* Push operation */
+void push(struct Node** top, char c) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = c;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+/* Pop operation */
+char pop(struct Node** top) {
+    if (*top == NULL)
+        return '\0';
+
+    struct Node* temp = *top;
+    char popped = temp->data;
+    *top = temp->next;
+    free(temp);
+    return popped;
+}
+
+/* Check if string is valid */
+bool isValid(char* s) {
+
+    struct Node* stack = NULL;
+
+    for(int i = 0; s[i] != '\0'; i++) {
+
+        char ch = s[i];
+
+        if(ch == '(' || ch == '{' || ch == '[') {
+            push(&stack, ch);
+        }
+        else {
+            char top = pop(&stack);
+
+            if((ch == ')' && top != '(') ||
+               (ch == '}' && top != '{') ||
+               (ch == ']' && top != '[')) {
+                return false;
+            }
+        }
+    }
+
+    return stack == NULL;
+}
+
+int main() {
+
+    char s[] = "()[]{}";
+
+    if(isValid(s))
+        printf("Valid Parentheses\n");
+    else
+        printf("Invalid Parentheses\n");
+
+    return 0;
+}
