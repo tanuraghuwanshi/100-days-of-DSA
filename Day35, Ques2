@@ -1,0 +1,81 @@
+// Implement a first in first out (FIFO) queue using only two stacks. The implemented queue should support all the functions of a normal queue (push, peek, pop, and empty).
+
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 100
+
+struct Stack {
+    int arr[MAX];
+    int top;
+};
+
+void init(struct Stack* s) {
+    s->top = -1;
+}
+
+// Push
+void pushStack(struct Stack* s, int x) {
+    s->arr[++(s->top)] = x;
+}
+
+// Pop
+int popStack(struct Stack* s) {
+    return s->arr[(s->top)--];
+}
+
+// Check empty
+int isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+// Queue using 2 stacks
+struct Stack s1, s2;
+
+// Push to queue
+void push(int x) {
+    pushStack(&s1, x);
+}
+
+// Transfer elements if needed
+void shiftStacks() {
+    if (isEmpty(&s2)) {
+        while (!isEmpty(&s1)) {
+            pushStack(&s2, popStack(&s1));
+        }
+    }
+}
+
+// Pop from queue
+int pop() {
+    shiftStacks();
+    return popStack(&s2);
+}
+
+// Peek front
+int peek() {
+    shiftStacks();
+    return s2.arr[s2.top];
+}
+
+// Check empty queue
+int empty() {
+    return isEmpty(&s1) && isEmpty(&s2);
+}
+
+// Main
+int main() {
+    init(&s1);
+    init(&s2);
+
+    push(10);
+    push(20);
+    push(30);
+
+    printf("%d\n", peek()); // 10
+    printf("%d\n", pop());  // 10
+    printf("%d\n", pop());  // 20
+
+    printf("%d\n", empty()); // 0 (false)
+
+    return 0;
+}
