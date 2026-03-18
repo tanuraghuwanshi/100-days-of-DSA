@@ -8,38 +8,44 @@ typedef struct {
     int front, rear, size, capacity;
 } MyCircularDeque;
 
-// Initialize deque
 MyCircularDeque* myCircularDequeCreate(int k) {
     MyCircularDeque* obj = (MyCircularDeque*)malloc(sizeof(MyCircularDeque));
     obj->arr = (int*)malloc(sizeof(int) * k);
     obj->capacity = k;
     obj->size = 0;
     obj->front = 0;
-    obj->rear = -1;
+    obj->rear = -1;   // IMPORTANT
     return obj;
 }
 
-// Insert at front
 bool myCircularDequeInsertFront(MyCircularDeque* obj, int value) {
     if (obj->size == obj->capacity) return false;
 
-    obj->front = (obj->front - 1 + obj->capacity) % obj->capacity;
+    if (obj->size == 0) {
+        obj->front = obj->rear = 0;
+    } else {
+        obj->front = (obj->front - 1 + obj->capacity) % obj->capacity;
+    }
+
     obj->arr[obj->front] = value;
     obj->size++;
     return true;
 }
 
-// Insert at rear
 bool myCircularDequeInsertLast(MyCircularDeque* obj, int value) {
     if (obj->size == obj->capacity) return false;
 
-    obj->rear = (obj->rear + 1) % obj->capacity;
+    if (obj->size == 0) {
+        obj->front = obj->rear = 0;
+    } else {
+        obj->rear = (obj->rear + 1) % obj->capacity;
+    }
+
     obj->arr[obj->rear] = value;
     obj->size++;
     return true;
 }
 
-// Delete front
 bool myCircularDequeDeleteFront(MyCircularDeque* obj) {
     if (obj->size == 0) return false;
 
@@ -48,7 +54,6 @@ bool myCircularDequeDeleteFront(MyCircularDeque* obj) {
     return true;
 }
 
-// Delete rear
 bool myCircularDequeDeleteLast(MyCircularDeque* obj) {
     if (obj->size == 0) return false;
 
@@ -57,31 +62,25 @@ bool myCircularDequeDeleteLast(MyCircularDeque* obj) {
     return true;
 }
 
-// Get front
 int myCircularDequeGetFront(MyCircularDeque* obj) {
     if (obj->size == 0) return -1;
     return obj->arr[obj->front];
 }
 
-// Get rear
 int myCircularDequeGetRear(MyCircularDeque* obj) {
     if (obj->size == 0) return -1;
     return obj->arr[obj->rear];
 }
 
-// Check empty
 bool myCircularDequeIsEmpty(MyCircularDeque* obj) {
     return obj->size == 0;
 }
 
-// Check full
 bool myCircularDequeIsFull(MyCircularDeque* obj) {
     return obj->size == obj->capacity;
 }
 
-// Free memory
 void myCircularDequeFree(MyCircularDeque* obj) {
     free(obj->arr);
     free(obj);
 }
- 
