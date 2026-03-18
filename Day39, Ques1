@@ -1,0 +1,100 @@
+// Implement a Min Heap using an array where the smallest element is always at the root.
+
+#include <stdio.h>
+
+#define MAX 100
+
+int heap[MAX];
+int size = 0;
+
+// Swap
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Heapify Up
+void heapifyUp(int i) {
+    while (i > 0 && heap[(i - 1) / 2] > heap[i]) {
+        swap(&heap[i], &heap[(i - 1) / 2]);
+        i = (i - 1) / 2;
+    }
+}
+
+// Heapify Down
+void heapifyDown(int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < size && heap[left] < heap[smallest])
+        smallest = left;
+
+    if (right < size && heap[right] < heap[smallest])
+        smallest = right;
+
+    if (smallest != i) {
+        swap(&heap[i], &heap[smallest]);
+        heapifyDown(smallest);
+    }
+}
+
+// Insert
+void insert(int value) {
+    if (size == MAX) {
+        printf("Heap Overflow\n");
+        return;
+    }
+
+    heap[size] = value;
+    heapifyUp(size);
+    size++;
+}
+
+// Delete (remove min)
+int deleteMin() {
+    if (size == 0) {
+        printf("Heap Underflow\n");
+        return -1;
+    }
+
+    int root = heap[0];
+    heap[0] = heap[size - 1];
+    size--;
+
+    heapifyDown(0);
+
+    return root;
+}
+
+// Peek (get min)
+int getMin() {
+    if (size == 0) return -1;
+    return heap[0];
+}
+
+// Display
+void display() {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", heap[i]);
+    }
+    printf("\n");
+}
+
+// Main
+int main() {
+    insert(10);
+    insert(5);
+    insert(20);
+    insert(2);
+
+    display();  // Heap array
+
+    printf("Min: %d\n", getMin());
+
+    printf("Deleted: %d\n", deleteMin());
+    display();
+
+    return 0;
+}
