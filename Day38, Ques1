@@ -1,0 +1,136 @@
+// A Deque is a linear data structure that allows insertion and deletion of elements from both the front and the rear. It provides more flexibility than a standard queue or stack.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure
+struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+};
+
+// Front and Rear
+struct Node *front = NULL, *rear = NULL;
+int count = 0;
+
+// push_front
+void push_front(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->prev = NULL;
+    newNode->next = front;
+
+    if (front == NULL) {
+        front = rear = newNode;
+    } else {
+        front->prev = newNode;
+        front = newNode;
+    }
+    count++;
+}
+
+// push_back
+void push_back(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+    newNode->prev = rear;
+
+    if (rear == NULL) {
+        front = rear = newNode;
+    } else {
+        rear->next = newNode;
+        rear = newNode;
+    }
+    count++;
+}
+
+// pop_front
+void pop_front() {
+    if (front == NULL) {
+        printf("Deque is empty\n");
+        return;
+    }
+
+    struct Node* temp = front;
+    front = front->next;
+
+    if (front != NULL)
+        front->prev = NULL;
+    else
+        rear = NULL;
+
+    free(temp);
+    count--;
+}
+
+// pop_back
+void pop_back() {
+    if (rear == NULL) {
+        printf("Deque is empty\n");
+        return;
+    }
+
+    struct Node* temp = rear;
+    rear = rear->prev;
+
+    if (rear != NULL)
+        rear->next = NULL;
+    else
+        front = NULL;
+
+    free(temp);
+    count--;
+}
+
+// front
+int getFront() {
+    if (front == NULL) return -1;
+    return front->data;
+}
+
+// back
+int getBack() {
+    if (rear == NULL) return -1;
+    return rear->data;
+}
+
+// empty
+int empty() {
+    return front == NULL;
+}
+
+// size
+int size() {
+    return count;
+}
+
+// Display
+void display() {
+    struct Node* temp = front;
+    while (temp != NULL) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+// Main (example usage)
+int main() {
+    push_back(10);
+    push_front(5);
+    push_back(20);
+
+    display(); // 5 10 20
+
+    pop_front();
+    display(); // 10 20
+
+    printf("Front: %d\n", getFront());
+    printf("Rear: %d\n", getBack());
+    printf("Size: %d\n", size());
+    printf("Empty: %d\n", empty());
+
+    return 0;
+}
