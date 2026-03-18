@@ -1,0 +1,38 @@
+// You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position.
+
+#include <stdlib.h>
+
+int* maxSlidingWindow(int* nums, int numsSize, int k, int* returnSize) {
+    if (numsSize == 0 || k == 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+
+    int* result = (int*)malloc(sizeof(int) * (numsSize - k + 1));
+    int* dq = (int*)malloc(sizeof(int) * numsSize); // store indices
+
+    int front = 0, rear = -1;
+    *returnSize = 0;
+
+    for (int i = 0; i < numsSize; i++) {
+
+        // Remove indices out of current window
+        if (front <= rear && dq[front] <= i - k)
+            front++;
+
+        // Maintain decreasing order in deque
+        while (front <= rear && nums[dq[rear]] < nums[i])
+            rear--;
+
+        // Add current index
+        dq[++rear] = i;
+
+        // Store result when window is valid
+        if (i >= k - 1) {
+            result[*returnSize] = nums[dq[front]];
+            (*returnSize)++;
+        }
+    }
+
+    return result;
+}
