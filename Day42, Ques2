@@ -1,0 +1,119 @@
+// The median is the middle value in an ordered integer list. If the size of the list is even, there is no middle value, and the median is the mean of the two middle values.
+
+#include <stdlib.h>
+
+#define MAX 10000
+
+typedef struct {
+    int maxHeap[MAX]; // smaller half
+    int minHeap[MAX]; // larger half
+    int maxSize;
+    int minSize;
+} MedianFinder;
+
+// Swap
+void swap(int *a, int *b) {
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+
+// Max Heapify Up
+void maxHeapifyUp(MedianFinder* obj, int i) {
+    while (i > 0 && obj->maxHeap[(i-1)/2] < obj->maxHeap[i]) {
+        swap(&obj->maxHeap[i], &obj->maxHeap[(i-1)/2]);
+        i = (i-1)/2;
+    }
+}
+
+// Max Heapify Down
+void maxHeapifyDown(MedianFinder* obj, int i) {
+    int largest = i;
+    int l = 2*i + 1, r = 2*i + 2;
+
+    if (l < obj->maxSize && obj->maxHeap[l] > obj->maxHeap[largest])
+        largest = l;
+    if (r < obj->maxSize && obj->maxHeap[r] > obj->maxHeap[largest])
+        largest = r;
+
+    if (largest != i) {
+        swap(&obj->maxHeap[i], &obj->maxHeap[largest]);
+        maxHeapifyDown(obj, largest);
+    }
+}
+
+// Min Heapify Up
+void minHeapifyUp(MedianFinder* obj, int i) {
+    while (i > 0 && obj->minHeap[(i-1)/2] > obj->minHeap[i]) {
+        swap(&obj->minHeap[i], &obj->minHeap[(i-1)/2]);
+        i = (i-1)/2;
+    }
+}
+
+// Min Heapify Down
+void minHeapifyDown(MedianFinder* obj, int i) {
+    int smallest = i;
+    int l = 2*i + 1, r = 2*i + 2;
+
+    if (l < obj->minSize && obj->minHeap[l] < obj->minHeap[smallest])
+        smallest = l;
+    if (r < obj->minSize && obj->minHeap[r] < obj->minHeap[smallest])
+        smallest = r;
+
+    if (smallest != i) {
+        swap(&obj->minHeap[i], &obj->minHeap[smallest]);
+        minHeapifyDown(obj, smallest);
+    }
+}
+
+// Create
+MedianFinder* medianFinderCreate() {
+    MedianFinder* obj = (MedianFinder*)malloc(sizeof(MedianFinder));
+    obj->maxSize = 0;
+    obj->minSize = 0;
+    return obj;
+}
+
+// Add number
+void medianFinderAddNum(MedianFinder* obj, int num) {
+
+    // Step 1: Add to maxHeap
+    obj->maxHeap[obj->maxSize] = num;
+    maxHeapifyUp(obj, obj->maxSize);
+    obj->maxSize++;
+
+    // Step 2: Move top to minHeap
+    obj->minHeap[obj->minSize] = obj->maxHeap[0];
+    obj->maxHeap[0] = obj->maxHeap[obj->maxSize - 1];
+    obj->maxSize--;
+    maxHeapifyDown(obj, 0);
+
+    minHeapifyUp(obj, obj->minSize);
+    obj->minSize++;
+
+    // Step 3: Balance
+    if (obj->minSize > obj->maxSize) {
+        obj->maxHeap[obj->maxSize] = obj->minHeap[0];
+        minHeapifyDown(obj, 0);
+
+        obj->minHeap[0] = obj->minHeap[obj->minSize - 1];
+        obj->minSize--;
+
+        maxHeapifyUp(obj, obj->maxSize);
+        obj->maxSize++;
+    }
+}
+
+// Find median
+double medianFinderFindMedian(MedianFinder* obj) {
+    if (obj->maxSize > obj->minSize)
+        return obj->maxHeap[0];
+    else
+        return (obj->maxHeap[0] + obj->minHeap[0]) / 2.0;
+}
+
+// Free
+void medianFinderFree(MedianFinder* obj) {
+    free(obj);
+}
+ 
