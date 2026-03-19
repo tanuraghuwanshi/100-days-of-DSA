@@ -1,0 +1,34 @@
+// Implement a Queue using a linked list supporting enqueue and dequeue operations.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Node structure
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+// Front and Rear
+struct Node *front = NULL, *rear = NULL;
+
+// Enqueue
+void enqueue(int value) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+    newNode->next = NULL;
+
+    if (rear == NULL) {
+        front = rear = newNode;
+    } else {
+        rear->next = newNode;
+        rear = newNode;
+    }
+}
+
+// Dequeue
+void dequeue() {
+   
+
+
