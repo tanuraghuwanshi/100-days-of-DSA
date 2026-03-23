@@ -1,0 +1,24 @@
+// BST Search
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+// Search function
+struct Node* search(struct Node* root, int key) {
+    // Base case
+    if (root == NULL || root->data == key)
+        return root;
+
+    // Search left
+    if (key < root->data)
+        return search(root->left, key);
+
+    // Search right
+    return search(root->right, key);
+}
