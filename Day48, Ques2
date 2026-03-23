@@ -1,0 +1,56 @@
+// Given the root of a binary tree, return the sum of all left leaves. A leaf is a node with no children. A left leaf is a leaf that is the left child of another node.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Tree Node
+struct TreeNode {
+    int val;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// Function to create node
+struct TreeNode* newNode(int val) {
+    struct TreeNode* node = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    node->val = val;
+    node->left = NULL;
+    node->right = NULL;
+    return node;
+}
+
+// Function to check if leaf
+int isLeaf(struct TreeNode* node) {
+    return (node && node->left == NULL && node->right == NULL);
+}
+
+// Function to find sum of left leaves
+int sumOfLeftLeaves(struct TreeNode* root) {
+    if (root == NULL)
+        return 0;
+
+    int sum = 0;
+
+    // Check left child
+    if (isLeaf(root->left)) {
+        sum += root->left->val;
+    }
+
+    // Recur for left and right
+    sum += sumOfLeftLeaves(root->left);
+    sum += sumOfLeftLeaves(root->right);
+
+    return sum;
+}
+
+// Main
+int main() {
+    struct TreeNode* root = newNode(3);
+    root->left = newNode(9);
+    root->right = newNode(20);
+    root->right->left = newNode(15);
+    root->right->right = newNode(7);
+
+    printf("Sum of left leaves: %d\n", sumOfLeftLeaves(root));
+    return 0;
+}
