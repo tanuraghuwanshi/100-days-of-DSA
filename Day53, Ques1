@@ -1,0 +1,124 @@
+// Given a binary tree, print its vertical order traversal. Nodes that lie on the same vertical line should be printed together from top to bottom and from left to right.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Tree structure
+struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+};
+
+// Queue structure for level order traversal
+struct QueueNode {
+    struct Node* treeNode;
+    int hd;
+    struct QueueNode* next;
+};
+
+struct Queue {
+    struct QueueNode *front, *rear;
+};
+
+// Create new tree node
+struct Node* newNode(int data) {
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->data = data;
+    node->left = node->right = NULL;
+    return node;
+}
+
+// Create queue
+struct Queue* createQueue() {
+    struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue));
+    q->front = q->rear = NULL;
+    return q;
+}
+
+// Enqueue
+void enqueue(struct Queue* q, struct Node* node, int hd) {
+    struct QueueNode* temp = (struct QueueNode*)malloc(sizeof(struct QueueNode));
+    temp->treeNode = node;
+    temp->hd = hd;
+    temp->next = NULL;
+
+    if (q->rear == NULL) {
+        q->front = q->rear = temp;
+        return;
+    }
+    q->rear->next = temp;
+    q->rear = temp;
+}
+
+// Dequeue
+struct QueueNode* dequeue(struct Queue* q) {
+    if (q->front == NULL) return NULL;
+
+    struct QueueNode* temp = q->front;
+    q->front = q->front->next;
+
+    if (q->front == NULL)
+        q->rear = NULL;
+
+    return temp;
+}
+
+// Vertical Order Traversal
+void verticalOrder(struct Node* root) {
+    if (root == NULL) return;
+
+    // Map using array (HD range assumed -100 to +100)
+    int map[200][100];  // store nodes
+    int count[200] = {0};
+
+    struct Queue* q = createQueue();
+    enqueue(q, root, 0);
+
+    int min = 0, max = 0;
+
+    while (q->front != NULL) {
+        struct QueueNode* temp = dequeue(q);
+        struct Node* node = temp->treeNode;
+        int hd = temp->hd;
+
+        int index = hd + 100; // shift to avoid negative index
+
+        map[index][count[index]++] = node->data;
+
+        if (hd < min) min = hd;
+        if (hd > max) max = hd;
+
+        if (node->left)
+            enqueue(q, node->left, hd - 1);
+
+        if (node->right)
+            enqueue(q, node->right, hd + 1);
+
+        free(temp);
+    }
+
+    // Print vertical order
+    for (int i = min; i <= max; i++) {
+        int index = i + 100;
+        for (int j = 0; j < count[index]; j++) {
+            printf("%d ", map[index][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Example
+int main() {
+    struct Node* root = newNode(1);
+    root->left = newNode(2);
+    root->right = newNode(3);
+    root->left->left = newNode(4);
+    root->left->right = newNode(5);
+    root->right->left = newNode(6);
+    root->right->right = newNode(7);
+
+    verticalOrder(root);
+
+    return 0;
+}
