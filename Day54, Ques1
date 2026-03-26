@@ -1,0 +1,66 @@
+// Perform zigzag (spiral) level order traversal of a binary tree. Alternate levels should be traversed left-to-right and right-to-left.
+
+#include <stdlib.h>
+struct Queue {
+    struct TreeNode** data;
+    int front, rear;
+};
+
+struct Queue* createQueue(int size) {
+    struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue));
+    q->data = (struct TreeNode**)malloc(sizeof(struct TreeNode*) * size);
+    q->front = q->rear = 0;
+    return q;
+}
+
+void enqueue(struct Queue* q, struct TreeNode* node) {
+    q->data[q->rear++] = node;
+}
+
+struct TreeNode* dequeue(struct Queue* q) {
+    return q->data[q->front++];
+}
+
+int isEmpty(struct Queue* q) {
+    return q->front == q->rear;
+}
+
+int** zigzagLevelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes) {
+    
+    if (!root) {
+        *returnSize = 0;
+        return NULL;
+    }
+
+    struct Queue* q = createQueue(10000);
+    enqueue(q, root);
+
+    int** result = (int**)malloc(sizeof(int*) * 10000);
+    *returnColumnSizes = (int*)malloc(sizeof(int) * 10000);
+
+    int level = 0;
+    int leftToRight = 1;
+
+    while (!isEmpty(q)) {
+        int size = q->rear - q->front;
+
+        result[level] = (int*)malloc(sizeof(int) * size);
+        (*returnColumnSizes)[level] = size;
+
+        for (int i = 0; i < size; i++) {
+            struct TreeNode* node = dequeue(q);
+
+            int index = leftToRight ? i : (size - 1 - i);
+            result[level][index] = node->val;
+
+            if (node->left) enqueue(q, node->left);
+            if (node->right) enqueue(q, node->right);
+        }
+
+        leftToRight = !leftToRight; // flip direction
+        level++;
+    }
+
+    *returnSize = level;
+    return result;
+}
