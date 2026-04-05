@@ -1,0 +1,17 @@
+// Given the root of a binary tree, flatten the tree into a "linked list":
+
+struct TreeNode* prev = NULL;
+
+void flatten(struct TreeNode* root) {
+    if (root == NULL)
+        return;
+    
+    // reverse preorder
+    flatten(root->right);
+    flatten(root->left);
+    
+    root->right = prev;
+    root->left = NULL;
+    
+    prev = root;
+}
