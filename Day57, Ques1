@@ -1,0 +1,17 @@
+// Convert a binary tree into its mirror image by swapping left and right children at every node.
+
+struct TreeNode* mirrorTree(struct TreeNode* root) {
+    if (root == NULL)
+        return NULL;
+    
+    // swap left and right
+    struct TreeNode* temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+    
+    // recurse
+    mirrorTree(root->left);
+    mirrorTree(root->right);
+    
+    return root;
+}
