@@ -1,0 +1,42 @@
+// Construct a binary tree from given preorder and inorder traversal arrays.
+
+#include <stdlib.h>
+
+// Tree node definition
+struct TreeNode {
+    int val;
+    struct TreeNode *left;
+    struct TreeNode *right;
+};
+
+int preIndex = 0;
+
+// helper function
+struct TreeNode* build(int* preorder, int* inorder, int inStart, int inEnd, int size) {
+    if (inStart > inEnd)
+        return NULL;
+    
+    // create root
+    struct TreeNode* root = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->val = preorder[preIndex++];
+    root->left = root->right = NULL;
+    
+    // find root in inorder
+    int inIndex;
+    for (inIndex = inStart; inIndex <= inEnd; inIndex++) {
+        if (inorder[inIndex] == root->val)
+            break;
+    }
+    
+    // build left and right
+    root->left = build(preorder, inorder, inStart, inIndex - 1, size);
+    root->right = build(preorder, inorder, inIndex + 1, inEnd, size);
+    
+    return root;
+}
+
+// main function
+struct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize) {
+    preIndex = 0;
+    return build(preorder, inorder, 0, inorderSize - 1, preorderSize);
+}
