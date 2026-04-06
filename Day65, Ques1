@@ -1,0 +1,32 @@
+// Using DFS and parent tracking, detect if undirected graph has a cycle.
+
+#include <stdbool.h>
+bool dfs(int node, int parent, int V, int adj[V][V], bool visited[]) {
+    visited[node] = true;
+
+    for (int neighbor = 0; neighbor < V; neighbor++) {
+        if (adj[node][neighbor]) {  // edge exists
+            if (!visited[neighbor]) {
+                if (dfs(neighbor, node, V, adj, visited))
+                    return true;
+            }
+            else if (neighbor != parent) {
+                return true; // cycle detected
+            }
+        }
+    }
+    return false;
+}
+bool isCycle(int V, int adj[V][V]) {
+    bool visited[V];
+    for (int i = 0; i < V; i++)
+        visited[i] = false;
+    for (int i = 0; i < V; i++) {
+        if (!visited[i]) {
+            if (dfs(i, -1, V, adj, visited))
+                return true;
+        }
+    }
+
+    return false;
+}
