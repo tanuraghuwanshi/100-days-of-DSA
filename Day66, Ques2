@@ -1,0 +1,70 @@
+// There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+bool canFinish(int numCourses, int** prerequisites, int prerequisitesSize, int* prerequisitesColSize) {
+    // Build adjacency list using arrays
+    int* in_degree = (int*)calloc(numCourses, sizeof(int));
+    
+    // Adjacency list: graph[i] holds courses that depend on course i
+    int** graph = (int**)calloc(numCourses, sizeof(int*));
+    int* graph_size = (int*)calloc(numCourses, sizeof(int));    // current size
+    int* graph_cap = (int*)calloc(numCourses, sizeof(int));     // capacity
+    
+    for (int i = 0; i < numCourses; i++) {
+        graph_cap[i] = 4;  // initial capacity
+        graph[i] = (int*)malloc(graph_cap[i] * sizeof(int));
+    }
+    
+    // Populate graph and in-degrees
+    for (int i = 0; i < prerequisitesSize; i++) {
+        int course = prerequisites[i][0];
+        int prereq = prerequisites[i][1];
+        
+        // Dynamic resize if needed
+        if (graph_size[prereq] == graph_cap[prereq]) {
+            graph_cap[prereq] *= 2;
+            graph[prereq] = (int*)realloc(graph[prereq], graph_cap[prereq] * sizeof(int));
+        }
+        
+        graph[prereq][graph_size[prereq]++] = course;
+        in_degree[course]++;
+    }
+    
+    // BFS queue
+    int* queue = (int*)malloc(numCourses * sizeof(int));
+    int front = 0, back = 0;
+    
+    // Enqueue all courses with no prerequisites
+    for (int i = 0; i < numCourses; i++) {
+        if (in_degree[i] == 0)
+            queue[back++] = i;
+    }
+    
+    int completed = 0;
+    
+    while (front < back) {
+        int course = queue[front++];
+        completed++;
+        
+        // Reduce in-degree for all dependent courses
+        for (int i = 0; i < graph_size[course]; i++) {
+            int next = graph[course][i];
+            if (--in_degree[next] == 0)
+                queue[back++] = next;
+        }
+    }
+    
+    // Cleanup
+    for (int i = 0; i < numCourses; i++)
+        free(graph[i]);
+    free(graph);
+    free(graph_size);
+    free(graph_cap);
+    free(in_degree);
+    free(queue);
+    
+    return completed == numCourses;
+}
