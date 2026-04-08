@@ -1,0 +1,50 @@
+// There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
+
+int* findOrder(int numCourses, int** prerequisites, int prerequisitesSize,
+               int* prerequisitesColSize, int* returnSize) {
+    int** adj     = (int**)calloc(numCourses, sizeof(int*));
+    int*  adjSize = (int*) calloc(numCourses, sizeof(int));
+
+    for (int i = 0; i < numCourses; i++)
+        adj[i] = (int*)malloc(numCourses * sizeof(int));
+    int* in_degree = (int*)calloc(numCourses, sizeof(int));
+    for (int i = 0; i < prerequisitesSize; i++) {
+        int course = prerequisites[i][0];
+        int prereq = prerequisites[i][1];
+        adj[prereq][adjSize[prereq]++] = course;
+        in_degree[course]++;
+    
+    int* queue = (int*)malloc(numCourses * sizeof(int));
+    int  front = 0, back = 0;
+
+    for (int i = 0; i < numCourses; i++)
+        if (in_degree[i] == 0)
+            queue[back++] = i;
+    int* order     = (int*)malloc(numCourses * sizeof(int));
+    int  orderSize = 0;
+
+    while (front < back) {
+        int course = queue[front++];
+        order[orderSize++] = course;
+
+        for (int i = 0; i < adjSize[course]; i++) {
+            int nb = adj[course][i];
+            if (--in_degree[nb] == 0)
+                queue[back++] = nb;
+        }
+    }
+
+    for (int i = 0; i < numCourses; i++) free(adj[i]);
+    free(adj);
+    free(adjSize);
+    free(in_degree);
+    free(queue);
+    if (orderSize != numCourses) {
+        free(order);
+        *returnSize = 0;
+        return NULL;
+    }
+
+    *returnSize = numCourses;
+    return order;
+}
