@@ -1,0 +1,119 @@
+// A new alien language uses the English alphabet, but the order of letters is unknown. You are given a list of words[] from the alien language’s dictionary, where the words are claimed to be sorted lexicographically according to the language’s rules.
+
+using System;
+using System.Collections.Generic;
+
+public class Solution {
+    public string FindOrder(string[] words, int n) {
+        // 1. Mark present letters
+        bool[] present = new bool[26];
+        foreach (var word in words)
+            foreach (var ch in word)
+                present[ch - 'a'] = true;
+
+        // 2. Build graph
+        bool[,] adj      = new bool[26, 26];
+        int[]   inDegree = new int[26];
+
+        for (int i = 0; i < n - 1; i++) {
+            string w1 = words[i], w2 = words[i + 1];
+            int minLen = Math.Min(w1.Length, w2.Length);
+            bool found = false;
+
+            for (int k = 0; k < minLen; k++) {
+                if (w1[k] != w2[k]) {
+                    int u = w1[k] - 'a';
+                    int v = w2[k] - 'a';
+                    if (!adj[u, v]) {
+                        adj[u, v] = true;
+                        inDegree[v]++;
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            // Invalid: "abc" before "ab" is impossible
+            if (!found && w1.Length > w2.Length)
+                return "";
+        }
+
+        // 3. Kahn's BFS — seed with in-degree 0 nodes
+        Queue<int> queue = new Queue<int>();
+        int total = 0;
+
+        for (int i = 0; i < 26; i++) {
+            if (present[i]) {
+                total++;
+                if (inDegree[i] == 0)
+                    queue.Enqueue(i);
+            }
+        }
+
+        // 4. Process queue
+        System.Text.StringBuilder result = new System.Text.StringBuilder();
+
+        while (queue.Count > 0) {
+            int u = queue.Dequeue();
+            result.Append((char)('a' + u));
+
+            for (int v = 0; v < 26; v++) {
+                if (adj[u, v]) {
+                    if (--inDegree[v] == 0)
+                        queue.Enqueue(v);
+                }
+            }
+        }
+
+        // 5. Cycle check
+        return result.Length == total ? result.ToString() : "";
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+//  Driver Code
+// ─────────────────────────────────────────────────────────
+class Program {
+    // Verifies the order is consistent with the word list
+    static bool Verify(string[] words, string order) {
+        if (string.IsNullOrEmpty(order)) return false;
+
+        int[] rank = new int[26];
+        Array.Fill(rank, -1);
+        for (int i = 0; i < order.Length; i++)
+            rank[order[i] - 'a'] = i;
+
+        for (int i = 0; i < words.Length - 1; i++) {
+            string w1 = words[i], w2 = words[i + 1];
+            int minLen = Math.Min(w1.Length, w2.Length);
+            bool ok = false;
+
+            for (int k = 0; k < minLen; k++) {
+                int r1 = rank[w1[k] - 'a'];
+                int r2 = rank[w2[k] - 'a'];
+                if (r1 < r2) { ok = true; break; }
+                if (r1 > r2) return false;
+            }
+            if (!ok && w1.Length > w2.Length) return false;
+        }
+        return true;
+    }
+
+    static void RunTest(string label, string[] words) {
+        Solution sol   = new Solution();
+        string   order = sol.FindOrder(words, words.Length);
+        bool     valid = Verify(words, order);
+
+        Console.WriteLine($"\n── {label} ──");
+        Console.WriteLine($"Input  : [{string.Join(", ", words)}]");
+        Console.WriteLine($"Output : {(string.IsNullOrEmpty(order) ? "\"\"" : order)}");
+        Console.WriteLine($"Result : {valid}");
+    }
+
+    static void Main() {
+        RunTest("Test 1", new[] { "baa", "abcd", "abca", "cab", "cad" });
+        RunTest("Test 2", new[] { "caa", "aaa", "aab" });
+        RunTest("Test 3", new[] { "ab", "cd", "ef", "ad" });
+        RunTest("Test 4", new[] { "abc", "ab" });
+        RunTest("Test 5", new[] { "z" });
+    }
+}
