@@ -1,0 +1,150 @@
+// Implement topological sorting using in-degree array and queue (Kahnâ€™s Algorithm).
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+// Adjacency list node
+struct Node {
+    int dest;
+    struct Node* next;
+};
+
+// Graph structure
+struct Graph {
+    int V;
+    struct Node* adjList[MAX];
+    int inDegree[MAX];
+};
+
+// ─────────────────────────────────────────
+//  Graph Operations
+// ─────────────────────────────────────────
+
+struct Graph* createGraph(int V) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->V = V;
+    for (int i = 0; i < V; i++) {
+        graph->adjList[i] = NULL;
+        graph->inDegree[i] = 0;
+    }
+    return graph;
+}
+
+void addEdge(struct Graph* graph, int src, int dest) {
+    // Add edge src → dest
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->dest = dest;
+    newNode->next = graph->adjList[src];
+    graph->adjList[src] = newNode;
+
+    // Increment in-degree of destination
+    graph->inDegree[dest]++;
+}
+
+// ─────────────────────────────────────────
+//  Queue Operations (simple circular queue)
+// ─────────────────────────────────────────
+
+int queue[MAX];
+int front = 0, rear = 0;
+
+void enqueue(int val) { queue[rear++] = val; }
+int  dequeue()        { return queue[front++]; }
+int  isEmpty()        { return front == rear; }
+
+// ─────────────────────────────────────────
+//  Kahn's Algorithm — Topological Sort
+// ─────────────────────────────────────────
+
+void topologicalSort(struct Graph* graph) {
+    int V = graph->V;
+    int topoOrder[MAX];
+    int count = 0;               // tracks processed vertices
+
+    // Step 1: Enqueue all vertices with in-degree 0
+    for (int i = 0; i < V; i++)
+        if (graph->inDegree[i] == 0)
+            enqueue(i);
+
+    printf("\nProcessing Order (Kahn's Algorithm):\n");
+    printf("--------------------------------------\n");
+
+    // Step 2: Process vertices
+    while (!isEmpty()) {
+        int u = dequeue();
+        topoOrder[count++] = u;
+        printf("  Dequeued vertex %d  →  reducing in-degree of neighbors: ", u);
+
+        // Decrease in-degree of all neighbors
+        struct Node* temp = graph->adjList[u];
+        int hasNeighbor = 0;
+
+        while (temp) {
+            hasNeighbor = 1;
+            int v = temp->dest;
+            printf("%d ", v);
+            graph->inDegree[v]--;
+
+            // If in-degree becomes 0, enqueue it
+            if (graph->inDegree[v] == 0)
+                enqueue(v);
+
+            temp = temp->next;
+        }
+        if (!hasNeighbor) printf("(none)");
+        printf("\n");
+    }
+
+    // Step 3: Check for cycle
+    if (count != V) {
+        printf("\n  !! Cycle detected — Topological sort not possible !!\n");
+        return;
+    }
+
+    // Step 4: Print result
+    printf("\nTopological Order:\n");
+    printf("------------------\n  ");
+    for (int i = 0; i < count; i++) {
+        printf("%d", topoOrder[i]);
+        if (i < count - 1) printf(" → ");
+    }
+    printf("\n");
+}
+
+// ─────────────────────────────────────────
+//  Main
+// ─────────────────────────────────────────
+
+int main() {
+    /*
+     *  Sample DAG:
+     *
+     *  5 → 0 ← 4
+     *  |         |
+     *  ↓         ↓
+     *  2 → 3 → 1
+     */
+    int V = 6;
+    struct Graph* graph = createGraph(V);
+
+    addEdge(graph, 5, 0);
+    addEdge(graph, 5, 2);
+    addEdge(graph, 4, 0);
+    addEdge(graph, 4, 1);
+    addEdge(graph, 2, 3);
+    addEdge(graph, 3, 1);
+
+    printf("Graph: %d vertices\n", V);
+    printf("Edges: 5→0, 5→2, 4→0, 4→1, 2→3, 3→1\n");
+
+    printf("\nInitial In-Degrees:\n");
+    printf("-------------------\n");
+    for (int i = 0; i < V; i++)
+        printf("  Vertex %d : in-degree = %d\n", i, graph->inDegree[i]);
+
+    topologicalSort(graph);
+
+    return 0;
+}
