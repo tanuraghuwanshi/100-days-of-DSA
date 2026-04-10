@@ -1,0 +1,50 @@
+// You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges times[i] = (ui, vi, wi), where ui is the source node, vi is the target node, and wi is the time it takes for a signal to travel from source 
+
+#define MAX_N 101
+#define INF   0x7fffffff
+
+int graph[MAX_N][MAX_N];
+
+int networkDelayTime(int** times, int timesSize, int* timesColSize, int n, int k) {
+    // Build adjacency matrix
+    for (int i = 0; i <= n; i++)
+        for (int j = 0; j <= n; j++)
+            graph[i][j] = 0;
+
+    for (int i = 0; i < timesSize; i++) {
+        int u = times[i][0], v = times[i][1], w = times[i][2];
+        graph[u][v] = w;
+    }
+
+    int  dist[MAX_N];
+    int  visited[MAX_N];
+
+    for (int i = 1; i <= n; i++) { dist[i] = INF; visited[i] = 0; }
+    dist[k] = 0;
+
+    for (int iter = 0; iter < n; iter++) {
+        // Pick unvisited node with smallest distance
+        int u = -1;
+        for (int i = 1; i <= n; i++)
+            if (!visited[i] && (u == -1 || dist[i] < dist[u]))
+                u = i;
+
+        if (dist[u] == INF) break;  // remaining nodes unreachable
+        visited[u] = 1;
+
+        // Relax all neighbours
+        for (int v = 1; v <= n; v++) {
+            if (graph[u][v] == 0) continue;
+            int nd = dist[u] + graph[u][v];
+            if (nd < dist[v]) dist[v] = nd;
+        }
+    }
+
+    // Answer = max shortest distance (last node to receive signal)
+    int ans = 0;
+    for (int i = 1; i <= n; i++) {
+        if (dist[i] == INF) return -1;
+        if (dist[i] > ans) ans = dist[i];
+    }
+    return ans;
+}
