@@ -1,0 +1,53 @@
+int parent[1001];
+int rank_arr[1001];
+
+// Find with path compression
+int find(int x) {
+    if (parent[x] != x)
+        parent[x] = find(parent[x]);   // path compression
+    return parent[x];
+}
+
+// Union by rank — returns false if already in same set
+bool unite(int x, int y) {
+    int px = find(x);
+    int py = find(y);
+
+    if (px == py) return false;   // same component → cycle!
+
+    // attach smaller rank tree under larger rank tree
+    if (rank_arr[px] < rank_arr[py])      parent[px] = py;
+    else if (rank_arr[px] > rank_arr[py]) parent[py] = px;
+    else {
+        parent[py] = px;
+        rank_arr[px]++;
+    }
+
+    return true;
+}
+
+int* findRedundantConnection(int** edges, int edgesSize,
+                             int* colSize, int* returnSize) {
+    // Init DSU
+    for (int i = 1; i <= edgesSize; i++) {
+        parent[i]   = i;
+        rank_arr[i] = 0;
+    }
+
+    int* result = (int*)malloc(2 * sizeof(int));
+    *returnSize = 2;
+
+    for (int i = 0; i < edgesSize; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+
+        if (!unite(u, v)) {
+            // u and v already connected → this is the redundant edge
+            result[0] = u;
+            result[1] = v;
+        }
+        // don't return early → problem says return the LAST such edge
+    }
+
+    return result;
+}
