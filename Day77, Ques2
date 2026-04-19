@@ -1,0 +1,72 @@
+typedef struct EdgeNode {
+    int to;
+    struct EdgeNode* next;
+} EdgeNode;
+
+EdgeNode* graph[100005];
+int disc[100005];
+int low[100005];
+bool visited[100005];
+int timer_val;
+int** result;
+int resultSize;
+
+void addEdge(int u, int v) {
+    EdgeNode* e1 = malloc(sizeof(EdgeNode));
+    e1->to = v;
+    e1->next = graph[u];
+    graph[u] = e1;
+
+    EdgeNode* e2 = malloc(sizeof(EdgeNode));
+    e2->to = u;
+    e2->next = graph[v];
+    graph[v] = e2;
+}
+
+void dfs(int u, int parent) {
+    visited[u] = true;
+    disc[u] = low[u] = timer_val++;
+
+    for (EdgeNode* curr = graph[u]; curr; curr = curr->next) {
+        int v = curr->to;
+
+        if (!visited[v]) {
+            dfs(v, u);
+
+            if (low[v] < low[u]) low[u] = low[v];
+
+            if (low[v] > disc[u]) {
+                result[resultSize]    = malloc(2 * sizeof(int));
+                result[resultSize][0] = u;
+                result[resultSize][1] = v;
+                resultSize++;
+            }
+
+        } else if (v != parent) {
+            if (disc[v] < low[u]) low[u] = disc[v];
+        }
+    }
+}
+
+int** criticalConnections(int n, int** connections, int connectionsSize,
+                          int* connectionsColSize, int* returnSize,
+                          int** returnColumnSizes) {
+
+    memset(graph,   0, n * sizeof(EdgeNode*));
+    memset(visited, 0, n * sizeof(bool));
+    timer_val  = 0;
+    resultSize = 0;
+    result     = malloc(connectionsSize * sizeof(int*));
+
+    for (int i = 0; i < connectionsSize; i++)
+        addEdge(connections[i][0], connections[i][1]);
+
+    dfs(0, -1);
+
+    *returnSize        = resultSize;
+    *returnColumnSizes = malloc(resultSize * sizeof(int));
+    for (int i = 0; i < resultSize; i++)
+        (*returnColumnSizes)[i] = 2;
+
+    return result;
+}
