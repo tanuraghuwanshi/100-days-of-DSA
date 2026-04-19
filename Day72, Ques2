@@ -1,0 +1,41 @@
+#include <string.h>
+#include <limits.h>
+
+#define INF 0x3f3f3f3f
+
+int dp[1 << 15][15];
+
+int total_cost(int cost[15][15], int n) {
+    memset(dp, 0x3f, sizeof(dp));
+
+    dp[1][0] = 0;
+
+    int totalMasks = 1 << n;
+
+    for (int mask = 1; mask < totalMasks; mask++) {
+        for (int u = 0; u < n; u++) {
+            if (!(mask & (1 << u))) continue;
+            if (dp[mask][u] >= INF)  continue;
+
+            for (int v = 0; v < n; v++) {
+                if (mask & (1 << v)) continue;
+
+                int newMask = mask | (1 << v);
+                int newCost = dp[mask][u] + cost[u][v];
+
+                if (newCost < dp[newMask][v])
+                    dp[newMask][v] = newCost;
+            }
+        }
+    }
+
+    int fullMask = totalMasks - 1;
+    int ans = INF;
+
+    for (int u = 1; u < n; u++) {
+        int total = dp[fullMask][u] + cost[u][0];
+        if (total < ans) ans = total;
+    }
+
+    return ans;
+}
