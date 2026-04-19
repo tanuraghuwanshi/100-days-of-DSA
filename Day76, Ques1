@@ -1,0 +1,106 @@
+// Using DFS or BFS, count number of connected components.
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+#define MAXN 100
+
+// ---------- Adjacency List ----------
+typedef struct EdgeNode {
+    int to;
+    struct EdgeNode* next;
+} EdgeNode;
+
+EdgeNode* graph[MAXN];
+bool visited[MAXN];
+
+void addEdge(int u, int v) {
+    EdgeNode* e1 = malloc(sizeof(EdgeNode));
+    e1->to = v;
+    e1->next = graph[u];
+    graph[u] = e1;
+
+    EdgeNode* e2 = malloc(sizeof(EdgeNode));
+    e2->to = u;
+    e2->next = graph[v];
+    graph[v] = e2;
+}
+
+// ========== DFS ==========
+void dfs(int u) {
+    visited[u] = true;
+    for (EdgeNode* e = graph[u]; e; e = e->next)
+        if (!visited[e->to])
+            dfs(e->to);
+}
+
+int countComponentsDFS(int n) {
+    memset(visited, 0, sizeof(visited));
+    int count = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            dfs(i);
+            count++;        // each unvisited node = new component
+        }
+    }
+    return count;
+}
+
+// ========== BFS ==========
+int queue[MAXN];
+
+void bfs(int start) {
+    int front = 0, back = 0;
+    queue[back++]    = start;
+    visited[start]   = true;
+
+    while (front < back) {
+        int u = queue[front++];
+        for (EdgeNode* e = graph[u]; e; e = e->next) {
+            if (!visited[e->to]) {
+                visited[e->to] = true;
+                queue[back++]  = e->to;
+            }
+        }
+    }
+}
+
+int countComponentsBFS(int n) {
+    memset(visited, 0, sizeof(visited));
+    int count = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            bfs(i);
+            count++;        // each unvisited node = new component
+        }
+    }
+    return count;
+}
+
+// ---------- Main ----------
+int main() {
+  
+    int n1 = 5;
+    memset(graph, 0, sizeof(graph));
+    addEdge(0, 1);
+    addEdge(2, 3);
+    printf("Graph 1 (DFS): %d\n", countComponentsDFS(n1));  // 3
+    printf("Graph 1 (BFS): %d\n", countComponentsBFS(n1));  // 3
+
+    int n2 = 5;
+    memset(graph, 0, sizeof(graph));
+    addEdge(0, 1); addEdge(1, 2);
+    addEdge(2, 3); addEdge(3, 4);
+    printf("Graph 2 (DFS): %d\n", countComponentsDFS(n2));  // 1
+    printf("Graph 2 (BFS): %d\n", countComponentsBFS(n2));  // 1
+
+    int n3 = 5;
+    memset(graph, 0, sizeof(graph));
+    printf("Graph 3 (DFS): %d\n", countComponentsDFS(n3));  // 5
+    printf("Graph 3 (BFS): %d\n", countComponentsBFS(n3));  // 5
+
+    return 0;
+}
