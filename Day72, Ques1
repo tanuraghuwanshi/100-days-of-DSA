@@ -1,0 +1,34 @@
+// Given a string s consisting of lowercase letters, find the first repeated character in the string. A character is considered repeated if it appears more than once, and among all such characters, the one whose second occurrence has the smallest index should be returned.
+
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+char firstRepeated(char* s) {
+    bool visited[26] = {false};
+
+    for (int i = 0; s[i] != '\0'; i++) {
+        int idx = s[i] - 'a';
+
+        if (visited[idx])
+            return s[i];     // second occurrence found → return immediately
+
+        visited[idx] = true;
+    }
+
+    return '\0';             // no repeated character found
+}
+
+int main() {
+    char s1[] = "abcabd";
+    char s2[] = "abcdef";
+    char s3[] = "aabbcc";
+    char s4[] = "abcdba";
+
+    printf("Input: %s → Output: %c\n", s1, firstRepeated(s1));
+    printf("Input: %s → Output: %c\n", s2, firstRepeated(s2) ?: '-');
+    printf("Input: %s → Output: %c\n", s3, firstRepeated(s3));
+    printf("Input: %s → Output: %c\n", s4, firstRepeated(s4));
+
+    return 0;
+}
