@@ -1,0 +1,96 @@
+// Given an array of integers containing both positive and negative values, find the length of the longest contiguous subarray whose sum is equal to zero.
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define TABLE_SIZE 10007   // prime size for better distribution
+#define EMPTY      -999999 // sentinel for unused slots
+
+typedef struct {
+    int  key;    // prefix sum
+    int  val;    // first index where this prefix sum occurred
+} Entry;
+
+Entry table[TABLE_SIZE];
+
+void initTable() {
+    for (int i = 0; i < TABLE_SIZE; i++)
+        table[i].key = EMPTY;
+}
+
+// Linear probing
+int hashFunc(int key) {
+    return ((key % TABLE_SIZE) + TABLE_SIZE) % TABLE_SIZE;
+}
+
+// Returns index where this sum is first stored (-1 if not found)
+int getIndex(int key) {
+    int h = hashFunc(key);
+    while (table[h].key != EMPTY) {
+        if (table[h].key == key)
+            return table[h].val;
+        h = (h + 1) % TABLE_SIZE;
+    }
+    return EMPTY;
+}
+
+// Insert only if key not already present
+void insertIfAbsent(int key, int val) {
+    int h = hashFunc(key);
+    while (table[h].key != EMPTY) {
+        if (table[h].key == key) return;  // already exists, don't overwrite
+        h = (h + 1) % TABLE_SIZE;
+    }
+    table[h].key = key;
+    table[h].val = val;
+}
+
+int maxLen(int* arr, int n) {
+    initTable();
+
+    // Base case: prefix sum 0 at index -1
+    // (handles subarrays starting from index 0)
+    insertIfAbsent(0, -1);
+
+    int prefSum = 0;
+    int maxLength = 0;
+
+    for (int i = 0; i < n; i++) {
+        prefSum += arr[i];
+
+        int firstIdx = getIndex(prefSum);
+
+        if (firstIdx != EMPTY) {
+            // Same prefix sum seen before → zero sum subarray found
+            int len = i - firstIdx;
+            if (len > maxLength)
+                maxLength = len;
+        } else {
+            // First time seeing this prefix sum → store it
+            insertIfAbsent(prefSum, i);
+        }
+    }
+
+    return maxLength;
+}
+
+int main() {
+    int a1[] = {15, -2, 2, -8, 1, 7, 10, 23};
+    printf("Input: 15 -2 2 -8 1 7 10 23\n");
+    printf("Output: %d\n\n", maxLen(a1, 8));    // 5
+
+    int a2[] = {1, 2, 3};
+    printf("Input: 1 2 3\n");
+    printf("Output: %d\n\n", maxLen(a2, 3));    // 0
+
+    int a3[] = {-3, 4, -4, 3, 5, -5};
+    printf("Input: -3 4 -4 3 5 -5\n");
+    printf("Output: %d\n\n", maxLen(a3, 6));    // 6
+
+    int a4[] = {0, 0, 0};
+    printf("Input: 0 0 0\n");
+    printf("Output: %d\n\n", maxLen(a4, 3));    // 3
+
+    return 0;
+}
