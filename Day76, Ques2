@@ -1,0 +1,29 @@
+struct Node* cloned[101];
+
+struct Node* cloneNode(struct Node* node) {
+    if (!node) return NULL;
+
+    // Already cloned → return existing copy
+    if (cloned[node->val]) return cloned[node->val];
+
+    // Create new node
+    struct Node* copy = malloc(sizeof(struct Node));
+    copy->val          = node->val;
+    copy->numNeighbors = node->numNeighbors;
+    copy->neighbors    = malloc(node->numNeighbors * sizeof(struct Node*));
+
+    // Register BEFORE recursing → handles cycles
+    cloned[node->val] = copy;
+
+    // Recursively clone each neighbor
+    for (int i = 0; i < node->numNeighbors; i++)
+        copy->neighbors[i] = cloneNode(node->neighbors[i]);
+
+    return copy;
+}
+
+struct Node* cloneGraph(struct Node* node) {
+    if (!node) return NULL;
+    memset(cloned, 0, sizeof(cloned));
+    return cloneNode(node);
+}
