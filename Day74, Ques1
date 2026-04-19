@@ -1,0 +1,54 @@
+// Given an array of candidate names where each name represents a vote cast for that candidate, determine the candidate who received the maximum number of votes. In case of a tie, return the lexicographically smallest candidate name.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAXLEN 100
+
+// Comparator for qsort
+int cmp(const void* a, const void* b) {
+    return strcmp((const char*)a, (const char*)b);
+}
+
+char* maxVotes(char votes[][MAXLEN], int n) {
+    // Step 1: sort alphabetically — groups same names together
+    qsort(votes, n, MAXLEN, cmp);
+
+    char* winner    = votes[0];   // best candidate so far
+    int   maxCount  = 1;          // their vote count
+    int   currCount = 1;          // current candidate's count
+
+    // Step 2: linear scan — count consecutive duplicates
+    for (int i = 1; i < n; i++) {
+        if (strcmp(votes[i], votes[i - 1]) == 0) {
+            currCount++;
+        } else {
+            currCount = 1;
+        }
+
+        // Update winner only if STRICTLY greater (ties → keep lexicographically smaller)
+        if (currCount > maxCount) {
+            maxCount = currCount;
+            winner   = votes[i];
+        }
+    }
+
+    return winner;
+}
+
+int main() {
+    char votes1[][MAXLEN] = {"alice", "bob", "alice", "charlie", "bob", "alice"};
+    printf("Input: alice bob alice charlie bob alice\n");
+    printf("Output: %s\n\n", maxVotes(votes1, 6));   // alice (3 votes)
+
+    char votes2[][MAXLEN] = {"bob", "alice"};
+    printf("Input: bob alice\n");
+    printf("Output: %s\n\n", maxVotes(votes2, 2));   // alice (tie → lex smaller)
+
+    char votes3[][MAXLEN] = {"charlie", "bob", "charlie", "bob"};
+    printf("Input: charlie bob charlie bob\n");
+    printf("Output: %s\n\n", maxVotes(votes3, 4));   // bob (tie → lex smaller)
+
+    return 0;
+}
