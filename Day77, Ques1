@@ -1,0 +1,106 @@
+// Using BFS or DFS, check if the entire graph is connected.
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAXN 100
+
+// ---------- Adjacency List ----------
+typedef struct EdgeNode {
+    int to;
+    struct EdgeNode* next;
+} EdgeNode;
+
+EdgeNode* graph[MAXN];
+bool visited[MAXN];
+
+void addEdge(int u, int v) {
+    EdgeNode* e1 = malloc(sizeof(EdgeNode));
+    e1->to = v;
+    e1->next = graph[u];
+    graph[u] = e1;
+
+    EdgeNode* e2 = malloc(sizeof(EdgeNode));
+    e2->to = u;
+    e2->next = graph[v];
+    graph[v] = e2;
+}
+
+// ========== DFS ==========
+void dfs(int u) {
+    visited[u] = true;
+    for (EdgeNode* e = graph[u]; e; e = e->next)
+        if (!visited[e->to])
+            dfs(e->to);
+}
+
+bool isConnectedDFS(int n) {
+    memset(visited, 0, sizeof(visited));
+
+    // Start DFS from node 0
+    dfs(0);
+
+    // If any node unvisited → not connected
+    for (int i = 0; i < n; i++)
+        if (!visited[i]) return false;
+
+    return true;
+}
+
+// ========== BFS ==========
+int queue[MAXN];
+
+bool isConnectedBFS(int n) {
+    memset(visited, 0, sizeof(visited));
+
+    int front = 0, back = 0;
+    queue[back++]  = 0;
+    visited[0]     = true;
+    int count      = 1;
+
+    while (front < back) {
+        int u = queue[front++];
+        for (EdgeNode* e = graph[u]; e; e = e->next) {
+            if (!visited[e->to]) {
+                visited[e->to] = true;
+                queue[back++]  = e->to;
+                count++;
+            }
+        }
+    }
+
+    // Connected only if ALL n nodes were reached
+    return count == n;
+}
+
+// ---------- Main ----------
+int main() {
+    // Graph 1: connected
+    // 0—1—2—3—4
+    int n1 = 5;
+    memset(graph, 0, sizeof(graph));
+    addEdge(0, 1); addEdge(1, 2);
+    addEdge(2, 3); addEdge(3, 4);
+    printf("Graph 1 DFS: %s\n", isConnectedDFS(n1) ? "Connected" : "Not Connected");
+    printf("Graph 1 BFS: %s\n", isConnectedBFS(n1) ? "Connected" : "Not Connected");
+
+    // Graph 2: not connected
+    // 0—1   2—3   4
+    int n2 = 5;
+    memset(graph, 0, sizeof(graph));
+    addEdge(0, 1);
+    addEdge(2, 3);
+    printf("Graph 2 DFS: %s\n", isConnectedDFS(n2) ? "Connected" : "Not Connected");
+    printf("Graph 2 BFS: %s\n", isConnectedBFS(n2) ? "Connected" : "Not Connected");
+
+    // Graph 3: single node
+    // 0
+    int n3 = 1;
+    memset(graph, 0, sizeof(graph));
+    printf("Graph 3 DFS: %s\n", isConnectedDFS(n3) ? "Connected" : "Not Connected");
+    printf("Graph 3 BFS: %s\n", isConnectedBFS(n3) ? "Connected" : "Not Connected");
+
+    return 0;
+}
