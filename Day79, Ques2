@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAXV 1000005
+#define MAXE 1000005
+
+// ── Adjacency list ─────────────────────────────────────────────────────────
+int  head[MAXV],  nxt[MAXE],  to[MAXE],  eCnt  = 0;  // original
+int  rhead[MAXV], rnxt[MAXE], rto[MAXE], reCnt = 0;  // transposed
+
+void addEdge(int u, int v) {
+    to[eCnt]   = v;
+    nxt[eCnt]  = head[u];
+    head[u]    = eCnt++;
+}
+
+void addREdge(int u, int v) {
+    rto[reCnt]  = v;
+    rnxt[reCnt] = rhead[u];
+    rhead[u]    = reCnt++;
+}
+
+// ── Stack (for finish order) ───────────────────────────────────────────────
+int  stk[MAXV], top = -1;
+void push(int x) { stk[++top] = x; }
+int  pop()       { return stk[top--]; }
+
+// ── DFS helpers ────────────────────────────────────────────────────────────
+bool visited[MAXV];
+int  V;
+
+// Step 1: DFS on original — push to stack on finish
+void dfs1(int u) {
+    visited[u] = true;
+    for (int e = head[u]; e != -1; e = nxt[e])
+        if (!visited[to[e]])
+            dfs1(to[e]);
+    push(u);                     // push AFTER all descendants finish
+}
+
+// Step 3: DFS on transposed — marks one full SCC
+void dfs2(int u) {
+    visited[u] = true;
+    for (int e = rhead[u]; e != -1; e = rnxt[e])
+        if (!visited[rto[e]])
+            dfs2(rto[e]);
+}
+
+// ── Kosaraju ───────────────────────────────────────────────────────────────
+int kosaraju() {
+    // Step 1: fill stack by finish time
+    memset(visited, false, sizeof(bool) * V);
+    for (int i = 0; i < V; i++)
+        if (!visited[i])
+            dfs1(i);
+
+    // Step 2: already built transposed graph during input
+
+    // Step 3: pop stack, DFS on transposed graph
+    memset(visited, false, sizeof(bool) * V);
+    int sccCount = 0;
+    while (top >= 0) {
+        int u = pop();
+        if (!visited[u]) {
+            dfs2(u);             // entire SCC gets marked
+            sccCount++;
+        }
+    }
+    return sccCount;
+}
+
+// ── Driver ─────────────────────────────────────────────────────────────────
+int main() {
+    int E;
+    printf("Enter V and E: ");
+    scanf("%d %d", &V, &E);
+
+    memset(head,  -1, sizeof(int) * V);
+    memset(rhead, -1, sizeof(int) * V);
+
+    printf("Enter edges (u v):\n");
+    for (int i = 0; i < E; i++) {
+        int u, v;
+        scanf("%d %d", &u, &v);
+        addEdge(u, v);           // original
+        addREdge(v, u);          // transposed (reverse)
+    }
+
+    printf("\nNumber of SCCs: %d\n", kosaraju());
+    return 0;
+}
