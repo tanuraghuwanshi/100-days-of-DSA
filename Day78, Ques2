@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAXV 100005
+
+// Adjacency list
+int adj[MAXV][MAXV]; // For small graphs; use dynamic list for large
+int degree[MAXV];
+
+int  disc[MAXV], low[MAXV], parent[MAXV];
+bool visited[MAXV], isAP[MAXV];
+int  timer_val = 0;
+
+int V;
+
+void dfs(int u) {
+    visited[u] = true;
+    disc[u] = low[u] = timer_val++;
+    int childCount = 0;
+
+    for (int i = 0; i < degree[u]; i++) {
+        int v = adj[u][i];
+
+        if (v == u) continue; // Skip self-loops
+
+        if (!visited[v]) {
+            childCount++;
+            parent[v] = u;
+            dfs(v);
+
+            low[u] = (low[u] < low[v]) ? low[u] : low[v];
+
+            // Case 1: root with 2+ children
+            if (parent[u] == -1 && childCount > 1)
+                isAP[u] = true;
+
+            // Case 2: non-root, child can't reach above u
+            if (parent[u] != -1 && low[v] >= disc[u])
+                isAP[u] = true;
+
+        } else if (v != parent[u]) {
+            // Back edge
+            low[u] = (low[u] < disc[v]) ? low[u] : disc[v];
+        }
+    }
+}
+
+int main() {
+    int E;
+    printf("Enter number of vertices and edges: ");
+    scanf("%d %d", &V, &E);
+
+    memset(degree, 0, sizeof(degree));
+    memset(visited, false, sizeof(visited));
+    memset(isAP,    false, sizeof(isAP));
+    memset(parent,  -1,    sizeof(parent));
+
+    printf("Enter edges (u v):\n");
+    for (int i = 0; i < E; i++) {
+        int u, v;
+        scanf("%d %d", &u, &v);
+        adj[u][degree[u]++] = v;
+        adj[v][degree[v]++] = u;
+    }
+
+    // Handle disconnected graphs
+    for (int i = 0; i < V; i++)
+        if (!visited[i])
+            dfs(i);
+
+    // Print result
+    printf("\nArticulation Points: ");
+    bool found = false;
+    for (int i = 0; i < V; i++) {
+        if (isAP[i]) {
+            printf("%d ", i);
+            found = true;
+        }
+    }
+    if (!found) printf("-1");
+    printf("\n");
+
+    return 0;
+}
