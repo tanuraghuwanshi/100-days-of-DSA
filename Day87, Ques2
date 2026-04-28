@@ -1,0 +1,34 @@
+long long totalHours(int* piles, int pilesSize, int k) {
+    long long hours = 0;
+    
+    for(int i = 0; i < pilesSize; i++) {
+        hours += (piles[i] + k - 1) / k; // ceil division
+    }
+    
+    return hours;
+}
+
+int minEatingSpeed(int* piles, int pilesSize, int h) {
+    int left = 1, right = 0;
+    
+    // find max pile
+    for(int i = 0; i < pilesSize; i++) {
+        if(piles[i] > right)
+            right = piles[i];
+    }
+    
+    int ans = right;
+    
+    while(left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if(totalHours(piles, pilesSize, mid) <= h) {
+            ans = mid;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return ans;
+}
