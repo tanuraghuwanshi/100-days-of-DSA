@@ -1,0 +1,54 @@
+// Given n stalls located at different positions along a straight line and k cows, place the cows in the stalls such that the minimum distance between any two cows is maximized.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+// Check if we can place k cows with at least 'minDist' between each
+int canPlace(int *stalls, int n, int k, int minDist) {
+    int count = 1;           // Place first cow in first stall
+    int lastPos = stalls[0]; // Track last placed cow's position
+
+    for (int i = 1; i < n; i++) {
+        if (stalls[i] - lastPos >= minDist) {
+            count++;
+            lastPos = stalls[i];
+            if (count == k) return 1; // All cows placed successfully
+        }
+    }
+    return 0;
+}
+
+int main() {
+    int n, k;
+    scanf("%d %d", &n, &k);
+
+    int stalls[n];
+    for (int i = 0; i < n; i++)
+        scanf("%d", &stalls[i]);
+
+    // Sort stall positions
+    qsort(stalls, n, sizeof(int), compare);
+
+    // Binary search on the answer
+    int lo = 1;                          // Minimum possible distance
+    int hi = stalls[n-1] - stalls[0];   // Maximum possible distance
+    int result = 0;
+
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+
+        if (canPlace(stalls, n, k, mid)) {
+            result = mid;   // Valid placement, try for larger distance
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;   // Not valid, reduce distance
+        }
+    }
+
+    printf("%d\n", result);
+    return 0;
+}
