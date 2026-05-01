@@ -1,0 +1,53 @@
+// Given n boards of different lengths and k painters, each painter paints contiguous boards. Painting a unit length of board takes one unit of time.
+
+#include <stdio.h>
+int canPaint(int* boards, int n, int k, long long mid) {
+    int painters = 1;
+    long long current = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (boards[i] > mid) return 0;              // Single board exceeds time limit
+        if (current + boards[i] > mid) {
+            painters++;                              // Assign new painter
+            current = boards[i];
+            if (painters > k) return 0;             // Need more painters than available
+        } else {
+            current += boards[i];
+        }
+    }
+    return 1;
+}
+
+int main() {
+    int n, k;
+    scanf("%d %d", &n, &k);
+
+    int boards[n];
+    long long lo = 0, hi = 0;
+
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &boards[i]);
+        if (boards[i] > lo) lo = boards[i];         // lo = longest single board
+        hi += boards[i];                            // hi = sum of all boards
+    }
+
+    if (k >= n) {                                   // Each painter gets one board
+        printf("%lld\n", lo);
+        return 0;
+    }
+
+    long long ans = hi;
+
+    while (lo <= hi) {
+        long long mid = lo + (hi - lo) / 2;
+        if (canPaint(boards, n, k, mid)) {
+            ans = mid;
+            hi = mid - 1;                           // Try less time
+        } else {
+            lo = mid + 1;                           // Need more time
+        }
+    }
+
+    printf("%lld\n", ans);
+    return 0;
+}
