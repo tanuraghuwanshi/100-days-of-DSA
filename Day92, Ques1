@@ -1,0 +1,98 @@
+#include <stdio.h>
+
+void swap(int *a, int *b) { int t = *a; *a = *b; *b = t; }
+
+/* ─────────────────────────────────────────────
+   LOMUTO PARTITION
+   Pivot = last element
+   Keeps one pointer (i) that marks the
+   boundary of elements ≤ pivot.
+
+   After partition:
+   [ ≤ pivot | > pivot | pivot ]
+              i        j
+   ───────────────────────────────────────────── */
+int lomutoPartition(int arr[], int lo, int hi) {
+    int pivot = arr[hi];        /* pivot = last element         */
+    int i     = lo - 1;        /* i: right edge of "≤" region  */
+
+    for (int j = lo; j < hi; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[hi]); /* place pivot in correct spot  */
+    return i + 1;                /* return pivot index           */
+}
+
+void quickSortLomuto(int arr[], int lo, int hi) {
+    if (lo < hi) {
+        int pi = lomutoPartition(arr, lo, hi);
+        quickSortLomuto(arr, lo, pi - 1);   /* sort left of pivot  */
+        quickSortLomuto(arr, pi + 1, hi);   /* sort right of pivot */
+    }
+}
+
+/* ─────────────────────────────────────────────
+   HOARE PARTITION
+   Pivot = first element
+   Two pointers (i, j) walk inward from both
+   ends and swap out-of-place elements.
+
+   After partition:
+   [ ≤ pivot | ≥ pivot ]
+              j i
+   Note: pivot is NOT necessarily at index j.
+   Recurse on [lo..j] and [j+1..hi].
+   ───────────────────────────────────────────── */
+int hoarePartition(int arr[], int lo, int hi) {
+    int pivot = arr[lo];        /* pivot = first element        */
+    int i     = lo - 1;
+    int j     = hi + 1;
+
+    while (1) {
+        do { i++; } while (arr[i] < pivot);   /* find left  violator */
+        do { j--; } while (arr[j] > pivot);   /* find right violator */
+        if (i >= j) return j;                  /* pointers crossed    */
+        swap(&arr[i], &arr[j]);
+    }
+}
+
+void quickSortHoare(int arr[], int lo, int hi) {
+    if (lo < hi) {
+        int j = hoarePartition(arr, lo, hi);
+        quickSortHoare(arr, lo, j);            /* includes pivot zone */
+        quickSortHoare(arr, j + 1, hi);
+    }
+}
+
+/* ───────── helpers ───────── */
+void printArray(int arr[], int n, const char *label) {
+    printf("%-22s", label);
+    for (int i = 0; i < n; i++)
+        printf("%d%s", arr[i], i < n - 1 ? " " : "\n");
+}
+
+void copyArray(int src[], int dst[], int n) {
+    for (int i = 0; i < n; i++) dst[i] = src[i];
+}
+
+/* ───────── main ───────── */
+int main() {
+    int original[] = {10, 7, 8, 9, 1, 5};
+    int n          = sizeof(original) / sizeof(original[0]);
+    int arr[n];
+
+    printArray(original, n, "Original:       ");
+
+    copyArray(original, arr, n);
+    quickSortLomuto(arr, 0, n - 1);
+    printArray(arr, n, "Lomuto sorted:  ");
+
+    copyArray(original, arr, n);
+    quickSortHoare(arr, 0, n - 1);
+    printArray(arr, n, "Hoare sorted:   ");
+
+    return 0;
+}
